@@ -1,5 +1,5 @@
 
-import ServerContext from "./ServerContext";
+import ServerContext from "../ServerContext";
 import { Request } from 'express';
 import passport from "passport";
 

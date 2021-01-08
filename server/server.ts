@@ -7,18 +7,20 @@ import config from '../config';
 import { loadControllers, scopePerRequest } from 'awilix-express';
 import { IServerContainer } from './container';
 import ServerContext from './ServerContext';
-import Server from 'next/dist/next-server/server/next-server';
+import NextServer from 'next/dist/next-server/server/next-server';
 import { NextFunction } from "express-serve-static-core";
 import { AwilixContainer } from "awilix";
 import { parse } from 'url';
 import passport from 'passport';
+import { Server } from 'http';
 
 
 export default class ExpressServer extends ServerContext {
 
-  private app: Server;
+  private app: NextServer;
   private context!: AwilixContainer;
   public get nextApp() { return this.app; }
+  public listener!: Server;
 
   public setContainer(value: AwilixContainer) {
     this.context = value;
@@ -27,7 +29,7 @@ export default class ExpressServer extends ServerContext {
   constructor(opts: IServerContainer) {
     super(opts);
     this.app = next({ dev: config.dev });
-    this.nextMiddleware = this.nextMiddleware.bind(this);
+    this.responseMiddleware = this.responseMiddleware.bind(this);
   }
 
   public async initialize() {
@@ -45,7 +47,7 @@ export default class ExpressServer extends ServerContext {
       }));
       server.use(passport.initialize());
       server.use(passport.session());
-      server.use(this.nextMiddleware);
+      server.use(this.responseMiddleware);
       server.use(scopePerRequest(this.context));
 
       const files = 'controllers/**/*.ts';
@@ -58,14 +60,15 @@ export default class ExpressServer extends ServerContext {
 
       this.di.passport.init();
 
-      server.listen(config.port, (err: string) => {
+      this.listener = server.listen(config.port, (err: string) => {
         if (err) throw err
         console.log(`> Ready on http://localhost:${config.port}`)
       });
+      this.di.socket.init();
     }).catch(err => console.log("On starting NEXT.JS APP happened error - ", err));
   }
 
-  private nextMiddleware(req: Request, res: Response, next: NextFunction) {
+  private responseMiddleware(req: Request, res: Response, next: NextFunction) {
 
     res.answer = (
       data: any,

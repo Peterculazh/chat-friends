@@ -24,7 +24,7 @@ export default class UserController extends ServerContext {
         try {
             const user = await this.di.UserService.getUser(req.body);
             if (user) {
-                const token = jwt.sign({ id: user.id }, this.di.config.jwtSecret);
+                const token = jwt.sign({ id: user.id, name: user.name }, this.di.config.jwtSecret);
                 res.cookie('jwt', token, { maxAge: 1000 * 60 * 60 * 24 });
                 return res.answer({ success: true, name: user.name }, "Success login", 201);
             } else {
