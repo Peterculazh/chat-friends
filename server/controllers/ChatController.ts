@@ -7,7 +7,7 @@ import ServerContext from "../ServerContext";
 export default class ChatController extends ServerContext {
 
     @POST()
-    @route('/message')
+    @route('')
     @before([passport.authenticate('jwt')])
     async registerUser(req: Request, res: Response) {
         try {

@@ -21,6 +21,7 @@ export default class ExpressServer extends ServerContext {
   private context!: AwilixContainer;
   public get nextApp() { return this.app; }
   public listener!: Server;
+  public onlineClients: Array<number>;
 
   public setContainer(value: AwilixContainer) {
     this.context = value;
@@ -30,6 +31,7 @@ export default class ExpressServer extends ServerContext {
     super(opts);
     this.app = next({ dev: config.dev });
     this.responseMiddleware = this.responseMiddleware.bind(this);
+    this.onlineClients = [];
   }
 
   public async initialize() {
@@ -64,7 +66,6 @@ export default class ExpressServer extends ServerContext {
         if (err) throw err
         console.log(`> Ready on http://localhost:${config.port}`)
       });
-      this.di.socket.init();
     }).catch(err => console.log("On starting NEXT.JS APP happened error - ", err));
   }
 

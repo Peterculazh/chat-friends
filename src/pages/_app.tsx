@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import App from 'next/app';
 import '../styles/main.sass';
 
@@ -12,12 +12,12 @@ class MyApp extends App {
 
         return { pageProps }
     }
-
     render() {
 
-        const { Component, pageProps } = this.props;
+        const { Component, pageProps }: { Component: any, pageProps: any } = this.props;
+        const getLayout = Component.getLayout || ((page: any) => page);
         return (
-            <Component {...pageProps} />
+            getLayout(<Component {...pageProps}></Component>)
         )
     }
 }
