@@ -4,7 +4,7 @@ import ChatLayout from "src/components/Layout/ChatLayout";
 function Chat() {
     return (
         <div>
-            Welcome to page!
+            Welcome to chat page!
         </div>
     )
 }
