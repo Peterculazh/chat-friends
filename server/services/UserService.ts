@@ -18,13 +18,13 @@ export default class GameService extends ServerContext {
         }
     }
 
-    public async getUser(data: any) {
+    public async getAuthenticatedUser(data: any) {
         if ((data?.nickname && data?.password) && (data.nickname.length !== 0 && data.password.length !== 0)) {
             const user = await this.di.RepositoryService.UserRepository.findOne({ name: data.nickname });
-            return user;
+            if (user && await bcrypt.compare(data.password, user?.password)) {
+                return user;
+            }
         }
-        else {
-            throw Error("Incorrect data");
-        }
+        throw Error("Incorrect data");
     }
 }

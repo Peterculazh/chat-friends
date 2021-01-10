@@ -13,7 +13,7 @@ export default class UserController extends ServerContext {
             const user = await this.di.UserService.createUser(req.body);
             return res.answer({ success: true, name: user.name }, "Success register", 201);
         } catch (error) {
-            console.log('1,',error);
+            console.log('/register error - ',error);
             return res.answer({ error }, "Happen error", 500);
         }
     }
@@ -22,8 +22,8 @@ export default class UserController extends ServerContext {
     @route('/login')
     async loginUser(req: Request, res: Response) {
         try {
-            const user = await this.di.UserService.getUser(req.body);
-            if (user) {
+            const user = await this.di.UserService.getAuthenticatedUser(req.body);
+            if (user && user.id && user.name) {
                 const token = jwt.sign({ id: user.id, name: user.name }, this.di.config.jwtSecret);
                 res.cookie('jwt', token, { maxAge: 1000 * 60 * 60 * 24 });
                 return res.answer({ success: true, name: user.name }, "Success login", 201);
@@ -31,7 +31,7 @@ export default class UserController extends ServerContext {
                 return res.answer({ error: "no such user" }, "Happen error", 404);
             }
         } catch (error) {
-            console.log('1,',error);
+            console.log('/login error - ',error);
             return res.answer({ error }, "Happen error", 500);
         }
     }

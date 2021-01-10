@@ -25,10 +25,10 @@ export default class RenderController extends ServerContext {
     ])
     async indexPage(_: Request, res: Response) {
         try {
-            console.log('render');
+            console.log('render / ');
             return res.print('/', {});
         } catch (error) {
-            console.log('happen error', error);
+            console.log('error on render route - / ', error);
             return res.print('/', { error });
         }
     }
@@ -49,10 +49,10 @@ export default class RenderController extends ServerContext {
     ])
     async chats(_: Request, res: Response) {
         try {
-            console.log('render');
+            console.log('render /chat/:chatId');
             return res.print('/chat/[id]', {});
         } catch (error) {
-            console.log('happen error', error);
+            console.log('error on render route - /chat/:chatId', error);
             return res.print('/', { error });
         }
     }
@@ -63,7 +63,7 @@ export default class RenderController extends ServerContext {
         try {
             return res.print('/login', {});
         } catch (error) {
-            console.log('happent error', error);
+            console.log('error on render route - /chat/:chatId', error);
             return res.print('/', { error });
         }
     }
