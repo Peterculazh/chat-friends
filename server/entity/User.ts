@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { FriendRequests } from "./FriendRequests";
 @Entity()
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -15,5 +16,8 @@ export class User extends BaseEntity {
 
     @Column({ nullable: true })
     token!: string;
+
+    @ManyToMany(() => FriendRequests, friendRequests => friendRequests.requests)
+    requests!: FriendRequests[];
 
 }

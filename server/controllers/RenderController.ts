@@ -1,9 +1,7 @@
 import { before, GET, route } from "awilix-express";
 import { NextFunction, Request, Response } from 'express';
-import passport from "passport";
+import { isAuthUser } from "../helpers/auth";
 import ServerContext from "../ServerContext";
-
-
 
 @route('')
 export default class RenderController extends ServerContext {
@@ -11,18 +9,7 @@ export default class RenderController extends ServerContext {
 
     @GET()
     @route('/')
-    @before([
-        (_req: Request, res: Response, next: NextFunction) => passport.authenticate('jwt', (err, user, _info) => {
-            // if (err) {
-            //     // return res.print('/', { redirect: '/login' });
-            // }
-            if (!user) {
-                return res.redirect('/login');
-            }
-            console.log('route "/" jwt auth -', err, user);
-            next()
-        })(_req, res, next)
-    ])
+    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/login")])
     async indexPage(_: Request, res: Response) {
         try {
             console.log('render / ');
@@ -35,18 +22,7 @@ export default class RenderController extends ServerContext {
 
     @GET()
     @route('/chat/:chatId')
-    @before([
-        (_req: Request, res: Response, next: NextFunction) => passport.authenticate('jwt', (err, user, _info) => {
-            // if (err) {
-            //     // return res.print('/', { redirect: '/login' });
-            // }
-            if (!user) {
-                return res.redirect('/login');
-            }
-            console.log('route "/" jwt auth -', err, user);
-            next()
-        })(_req, res, next)
-    ])
+    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/login")])
     async chats(_: Request, res: Response) {
         try {
             console.log('render /chat/:chatId');
@@ -61,9 +37,10 @@ export default class RenderController extends ServerContext {
     @route('/login')
     async loginPage(_: Request, res: Response) {
         try {
+            console.log("render /login")
             return res.print('/login', {});
         } catch (error) {
-            console.log('error on render route - /chat/:chatId', error);
+            console.log('error on render route - /login', error);
             return res.print('/', { error });
         }
     }

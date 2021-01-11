@@ -2,7 +2,7 @@
   "name": "custom-server-typescript",
   "version": "1.0.0",
   "scripts": {
-    "dev": "cross-env NODE_ENV=dev tsnd server/index.ts ",
+    "dev": "cross-env NODE_ENV=dev nodemon server/index.ts ",
     "build": "next build && tsc --project tsconfig.server.json",
     "start": "cross-env NODE_ENV=production node dist/index.js",
     "migrate": "ts-node ./node_modules/typeorm/cli.js migration:run"
@@ -48,7 +48,10 @@
     "react-dom": "^17.0.1",
     "react-redux": "^7.2.2",
     "reflect-metadata": "^0.1.10",
-    "typeorm": "0.2.29"
+    "socket.io": "^3.0.5",
+    "socket.io-client": "^3.0.5",
+    "typeorm": "0.2.29",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/node": "^12.0.12",
