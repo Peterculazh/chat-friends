@@ -8,6 +8,8 @@ export default function ChatUserList(
             id: number
         }]
     }) {
+
+
     return <div className="chat-user-list">
         {users.map(user => <div key={user.id}
             className="item">

@@ -63,15 +63,15 @@ export default class Socket extends ServerContext {
                 });
                 this.io
                     .on('connection', async (socket) => {
-                        const newClient = this.createClient(socket);
+                        const client = this.createClient(socket);
 
-                        this.addClientToChannel("main", newClient, socket);
+                        this.addClientToChannel("main", client, socket);
 
                         socket.emit("joinRoom", {
                             channelName: mainChannel.publicName,
                             channelId: mainChannel.id,
                             messages: mainChannel.messages,
-                            users: this.getClientsDataInChannel(mainChannel),
+                            users: this.getClientsDataInChannel(mainChannel, client),
                         });
 
 
@@ -90,12 +90,18 @@ export default class Socket extends ServerContext {
 
     }
 
-    public getClientsDataInChannel(channel: IChannel) {
-        return Object.values(channel.clients).map(client => {
+    public getClientsDataInChannel(channel: IChannel, client: IClient) {
+        const clients = Object.values(channel.clients).map(client => {
             return {
                 name: client.name,
                 id: client.id,
+                isYou: false, // TODO: Change name
             }
+        });
+        clients.push({
+            name: client.name,
+            id: client.id,
+            isYou: true,
         });
     }
 
