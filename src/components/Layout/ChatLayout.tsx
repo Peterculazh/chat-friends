@@ -1,6 +1,7 @@
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { IPublicClientData } from "src/interfaces/socket";
 import Chat from "../Chat";
 
 
@@ -13,10 +14,7 @@ export interface IChannel {
     channelName: string,
     channelId: string,
     messages: IMessage[],
-    users: [{
-        name: string,
-        id: number
-    }],
+    users: IPublicClientData[],
 }
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
@@ -27,9 +25,11 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     const [currentChat, setCurrentChat] = useState<null | string>(null);
 
     useEffect(() => {
-        setSocket(io({
-            query: `jwt=${Cookies.get('jwt')}`
-        }));
+        if (!socket && !connected) {
+            setSocket(io({
+                query: `jwt=${Cookies.get('jwt')}`
+            }));
+        }
     }, []);
     useEffect(() => {
         if (socket) {
@@ -40,12 +40,15 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             socket.on("joinRoom", (data: IChannel) => {
                 setChats(currentChats => [...currentChats, data]);
             });
+            socket.on("friendInvite", (data: any) => {
+                console.log("friend invite", data);
+            });
         }
     }, [socket]);
 
     return (
         <>
-            {connected ?
+            {socket && connected ?
                 <div>
                     <div className="chats">
                         {chats.map(chat =>
@@ -59,7 +62,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                     <div>
                         {currentChat ?
                             <div>
-                                <Chat channel={chats.find(chat => chat.channelId === currentChat)} />
+                                <Chat channel={chats.find(chat => chat.channelId === currentChat)} socket={socket} />
                             </div> :
                             <div>
                                 Empty

@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./User";
 
 
@@ -7,11 +7,16 @@ export class FriendRequests extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @OneToMany(() => User, user => user.id)
-    userId!: number;
+    @OneToOne(() => User)
+    @JoinColumn()
+    user!: User;
 
+    @ManyToMany(() => User, user => user.outcomingRequests, { cascade: true, eager: true })
+    @JoinTable()
+    outcomingRequests!: User[];
 
-    @ManyToMany(() => User, user => user.requests)
-    requests!: User[];
+    @ManyToMany(() => User, user => user.incomingRequests, { cascade: true, eager: true })
+    @JoinTable()
+    incomingRequests!: User[];
 
 }

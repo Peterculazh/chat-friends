@@ -34,13 +34,13 @@ export default class RenderController extends ServerContext {
     }
 
     @GET()
-    @route('/login')
-    async loginPage(_: Request, res: Response) {
+    @route('/auth')
+    async authPage(_: Request, res: Response) {
         try {
-            console.log("render /login")
-            return res.print('/login', {});
+            console.log("render /auth")
+            return res.print('/auth', {});
         } catch (error) {
-            console.log('error on render route - /login', error);
+            console.log('error on render route - /auth', error);
             return res.print('/', { error });
         }
     }

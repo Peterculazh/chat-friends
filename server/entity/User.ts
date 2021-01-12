@@ -9,15 +9,15 @@ export class User extends BaseEntity {
     name!: string;
 
     @Column()
+    friends!: number;
+
+    @Column()
     password!: string;
 
-    @Column("int", { array: true, nullable: true })
-    array!: number[];
+    @ManyToMany(() => FriendRequests, friendRequests => friendRequests.incomingRequests)
+    incomingRequests!: FriendRequests[];
 
-    @Column({ nullable: true })
-    token!: string;
-
-    @ManyToMany(() => FriendRequests, friendRequests => friendRequests.requests)
-    requests!: FriendRequests[];
+    @ManyToMany(() => FriendRequests, friendRequests => friendRequests.outcomingRequests)
+    outcomingRequests!: FriendRequests[];
 
 }

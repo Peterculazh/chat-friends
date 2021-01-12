@@ -29,6 +29,12 @@ interface IMessage {
     createdAt: number,
 }
 
+interface IPublicClientData {
+    name: string,
+    id: number,
+    isYou: boolean
+}
+
 
 export default class Socket extends ServerContext {
     public io!: Server;
@@ -64,7 +70,7 @@ export default class Socket extends ServerContext {
                 this.io
                     .on('connection', async (socket) => {
                         const client = this.createClient(socket);
-
+                        socket.id;
                         this.addClientToChannel("main", client, socket);
 
                         socket.emit("joinRoom", {
@@ -79,30 +85,39 @@ export default class Socket extends ServerContext {
                             this.io.emit("message", this.createMessage(data.nickname, data.message));
                         });
 
+                        socket.on("addFriend", async (data: { id: number }) => {
+                            if (data.id && data.id !== socket.decodedToken.id) {
+                                const result = await this.di.FriendService.sendRequestToFriend(data.id, socket.decodedToken.id);
+                                if (result && result.length) {
+                                    const [incomingRequests] = result;
+                                    const sendFriendRequest = this.clients[incomingRequests.user.id];
+                                    this.io.to(sendFriendRequest.socket.id).emit("friendInvite", incomingRequests.incomingRequests);
+                                    // console.log("socket id",sendFriendRequest.socket.id);
+                                    // console.log(outComingRequest);
+                                }
+                            }
+                        });
+
                     });
             } catch (err) {
                 console.log("Socket error - ", err);
             }
         } else {
             console.log("Trouble with creating main channel");
-            console.log("Trying to run sockets again", this.init());
+            // console.log("Trying to run sockets again", this.init());
         }
 
     }
 
-    public getClientsDataInChannel(channel: IChannel, client: IClient) {
-        const clients = Object.values(channel.clients).map(client => {
+    public getClientsDataInChannel(channel: IChannel, socketClient: IClient) {
+        const clients: IPublicClientData[] = Object.values(channel.clients).map(client => {
             return {
                 name: client.name,
                 id: client.id,
-                isYou: false, // TODO: Change name
+                isYou: client.id === socketClient.id ? true : false, // TODO: Change name
             }
         });
-        clients.push({
-            name: client.name,
-            id: client.id,
-            isYou: true,
-        });
+        return clients;
     }
 
     public getChannelById(id: string) {
