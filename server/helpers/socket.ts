@@ -120,6 +120,10 @@ export default class Socket extends ServerContext {
                             await this.di.FriendService.acceptFriend(data.targetUser.id, data.sourceUser.id);
                         });
 
+                        socket.on("declineRequest", async (data: { sourceUser: { id: number }, targetUser: { id: number } }) => {
+                            await this.di.FriendService.declineFriend(data.targetUser.id, data.sourceUser.id);
+                        });
+
                     });
             } catch (err) {
                 console.log("Socket error - ", err);

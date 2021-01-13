@@ -71,6 +71,19 @@ export default class FriendService extends ServerContext {
         }
     }
 
+    public async declineFriend(targetId: number, sourceId: number) {
+        const [targetUser, sourceUser] = await Promise.all([
+            this.di.RepositoryService.UserRepository.findOne(targetId),
+            this.di.RepositoryService.UserRepository.findOne(sourceId)
+        ]);
+        if (targetUser && sourceUser) {
+            return await Promise.all([
+                this.removeIncomingRequest(targetUser, sourceUser),
+                this.removeOutcomingRequest(sourceUser, targetUser)
+            ]);
+        }
+    }
+
     public async removeIncomingRequest(targetUser: User, sourceUser: User, friendList?: FriendList) {
         if (!friendList) {
             friendList = await this.getOrCreateFriendListEntity(targetUser);

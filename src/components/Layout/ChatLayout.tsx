@@ -73,6 +73,15 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
         });
     }
 
+    const handleFriendDecline = (user: IFriendData) => {
+        socket?.emit("declineRequest", {
+            sourceUser: user,
+            targetUser: {
+                id: userData?.id,
+            }
+        });
+    }
+
     return (
         <>
             {socket && connected ?
@@ -100,6 +109,17 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                         Incoming requests
                         {userData?.incomingRequests.map(request =>
                         <div key={request.id} onClick={() => handleFriendAccept(request)}>
+                            {request.name} ---
+                            <div onClick={() => handleFriendDecline(request)}>
+                                decline
+                            </div>
+                        </div>
+                    )}
+                    </div>
+                    <div>
+                        Outcoming requests (waiting for response)
+                        {userData?.incomingRequests.map(request =>
+                        <div key={request.id}>
                             {request.name}
                         </div>
                     )}
