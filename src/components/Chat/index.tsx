@@ -1,11 +1,24 @@
-import { IChannel } from "../Layout/ChatLayout";
+import { IChannel, IPublicClientData } from "../Layout/ChatLayout";
 import { Socket } from "socket.io-client";
 import UserList from "./Users";
+import { FormEvent, useState } from "react";
 
 
 
-export default function Chat({ channel, socket }: { channel: IChannel | undefined, socket: Socket }) {
-    console.log(channel);
+export default function Chat({ channel, socket, userData }: { channel: IChannel | undefined, socket: Socket, userData: IPublicClientData }) {
+    const [text, setText] = useState("");
+
+
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        socket.emit("message", {
+            id: userData.id,
+            channelId: channel?.channelId,
+            message: text,
+            name: userData.name,
+        });
+    }
+
     return (
         <>{
             channel ?
@@ -16,9 +29,21 @@ export default function Chat({ channel, socket }: { channel: IChannel | undefine
         }
             {
                 channel ?
-                    channel.messages.map(message => <div>
-                        {message}
-                    </div>)
+                    <div>
+                        {channel.messages.map((message, index) => <div key={index}>
+                            <div>
+                                {message.name}
+                            </div>
+                            {message.message}
+                        </div>)}
+
+                        <div>
+                            <form onSubmit={handleSubmit}>
+                                <input type="text" value={text} onChange={(e) => setText(e.target.value)} />
+                                <button type="submit">Submit</button>
+                            </form>
+                        </div>
+                    </div>
                     :
                     "no channel"
             }

@@ -6,7 +6,7 @@ import Chat from "../Chat";
 
 export interface IMessage {
     message: string,
-    author: string,
+    name: string,
     createdAt: number,
 }
 export interface IChannel {
@@ -35,7 +35,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     const [connected, setConnected] = useState(false);
     const [chats, setChats] = useState<Array<IChannel>>([]);
     const [currentChat, setCurrentChat] = useState<null | string>(null);
-    const [userData, setUserData] = useState<IPublicClientData | null>();
+    const [userData, setUserData] = useState<IPublicClientData>();
 
     useEffect(() => {
         if (!socket && !connected) {
@@ -60,6 +60,22 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             socket.on("userData", (data: any) => {
                 setUserData(data);
                 console.log(data);
+            });
+            socket.on("message", ({ message, channelId }: {
+                message: IMessage,
+                channelId: string,
+            }) => {
+                if (message && channelId) {
+                    console.log("message");
+                    setChats(chats => {
+                        const newChats = [...chats];
+                        const chat = newChats.find(chat => chat.channelId === channelId);
+                        if (chat) {
+                            chat.messages.push(message);
+                        }
+                        return newChats;
+                    });
+                }
             });
         }
     }, [socket]);
@@ -96,9 +112,9 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                         )}
                     </div>
                     <div>
-                        {currentChat ?
+                        {currentChat && userData ?
                             <div>
-                                <Chat channel={chats.find(chat => chat.channelId === currentChat)} socket={socket} />
+                                <Chat userData={userData} channel={chats.find(chat => chat.channelId === currentChat)} socket={socket} />
                             </div> :
                             <div>
                                 No selected chat

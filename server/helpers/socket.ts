@@ -33,7 +33,7 @@ interface IChannel {
 
 interface IMessage {
     message: string,
-    author: string,
+    name: string,
     createdAt: number,
 }
 
@@ -50,14 +50,6 @@ export default class Socket extends ServerContext {
     public io!: Server;
     public clients!: { [key: string]: IClient };
     public channels!: Array<IChannel>;
-
-    public createMessage = (name: string, message: string) => {
-        return {
-            name,
-            message,
-            time: new Date()
-        };
-    }
 
     public async init() {
         this.clients = {};
@@ -100,10 +92,6 @@ export default class Socket extends ServerContext {
                         });
 
 
-                        socket.on("message", (data: { id: number, nickname: string, message: string }) => {
-                            this.io.emit("message", this.createMessage(data.nickname, data.message));
-                        });
-
                         socket.on("addFriend", async (data: { id: number }) => {
                             if (data.id && data.id !== socket.decodedToken.id) {
                                 const result = await this.di.FriendService.sendRequestToFriend(data.id, socket.decodedToken.id);
@@ -122,6 +110,17 @@ export default class Socket extends ServerContext {
 
                         socket.on("declineRequest", async (data: { sourceUser: { id: number }, targetUser: { id: number } }) => {
                             await this.di.FriendService.declineFriend(data.targetUser.id, data.sourceUser.id);
+                        });
+
+                        socket.on("message", async (data: { id: number, name: string, channelId: string, message: string }) => {
+                            const channel = this.getChannelById(data.channelId);
+                            if (channel) {
+                                const message = this.addMessageToChannel(channel, data.name, data.message);
+                                this.io.to(channel.name).emit("message", {
+                                    message,
+                                    channelId: channel.id
+                                });
+                            }
                         });
 
                     });
@@ -208,5 +207,19 @@ export default class Socket extends ServerContext {
                 name: user.name
             }
         });
+    }
+
+    public addMessageToChannel(channel: IChannel, name: string, message: string) {
+        const newMessage: IMessage = this.createMessage(name, message);
+        channel.messages.push(newMessage);
+        return newMessage;
+    }
+
+    public createMessage(name: string, message: string): IMessage {
+        return {
+            name,
+            message,
+            createdAt: Date.now()
+        }
     }
 }
