@@ -1,5 +1,5 @@
 import { User } from "../entity/User";
-import { FriendRequests } from "../entity/FriendRequests";
+import { FriendList } from "../entity/FriendList";
 import ServerContext from "../ServerContext";
 
 export default class FriendService extends ServerContext {
@@ -22,38 +22,38 @@ export default class FriendService extends ServerContext {
         return false;
     }
 
-    public async setIncomingRequests(targetUser: User, sourceUser: User, friendRequest?: FriendRequests) {
-        if (!friendRequest) {
-            friendRequest = await this.getOrCreateFriendRequestEntity(targetUser);
+    public async setIncomingRequests(targetUser: User, sourceUser: User, friendList?: FriendList) {
+        if (!friendList) {
+            friendList = await this.getOrCreateFriendListEntity(targetUser);
         }
-        friendRequest.incomingRequests = [sourceUser];
-        return await this.di.RepositoryService.FriendRequestsRepository.save(friendRequest);
+        friendList.incomingRequests = [sourceUser];
+        return await this.di.RepositoryService.FriendListRepository.save(friendList);
     }
 
-    public async setOutcomingRequests(targetUser: User, sourceUser: User, friendRequest?: FriendRequests) {
-        if (!friendRequest) {
-            friendRequest = await this.getOrCreateFriendRequestEntity(targetUser);
+    public async setOutcomingRequests(targetUser: User, sourceUser: User, friendList?: FriendList) {
+        if (!friendList) {
+            friendList = await this.getOrCreateFriendListEntity(targetUser);
         }
-        friendRequest.outcomingRequests = [sourceUser];
-        return await this.di.RepositoryService.FriendRequestsRepository.save(friendRequest);
+        friendList.outcomingRequests = [sourceUser];
+        return await this.di.RepositoryService.FriendListRepository.save(friendList);
     }
 
-    public async getOrCreateFriendRequestEntity(user: User) {
-        let friendRequest = await this.di.RepositoryService.FriendRequestsRepository.findOne({
+    public async getOrCreateFriendListEntity(user: User) {
+        let friendList = await this.di.RepositoryService.FriendListRepository.findOne({
             relations: ['user'],
             where: {
                 "user": user
             }
         });
-        if (!friendRequest) {
-            friendRequest = await this.createFriendRequestEntity(user);
+        if (!friendList) {
+            friendList = await this.createFriendListEntity(user);
         }
-        return friendRequest;
+        return friendList;
     }
 
-    public async createFriendRequestEntity(user: User) {
-        const newFriendRequestEntity = new FriendRequests();
-        newFriendRequestEntity.user = user;
-        return await this.di.RepositoryService.FriendRequestsRepository.save(newFriendRequestEntity)
+    public async createFriendListEntity(user: User) {
+        const newFriendListEntity = new FriendList();
+        newFriendListEntity.user = user;
+        return await this.di.RepositoryService.FriendListRepository.save(newFriendListEntity);
     }
 }

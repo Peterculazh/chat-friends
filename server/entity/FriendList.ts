@@ -3,7 +3,7 @@ import { User } from "./User";
 
 
 @Entity()
-export class FriendRequests extends BaseEntity {
+export class FriendList extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 

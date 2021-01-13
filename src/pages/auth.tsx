@@ -11,7 +11,7 @@ export default function Login() {
 
     const [nickName, setNickName] = useState("");
     const [password, setPassword] = useState("");
-    const [authForm, setAuthForm] = useState<any>(Form.LOGIN);
+    const [authForm, setAuthForm] = useState(Form.LOGIN);
     const router = useRouter();
 
     const onSubmit = async (_: any) => {
@@ -35,7 +35,7 @@ export default function Login() {
                 <input type="password" name="password" value={password} onChange={e => setPassword(e.target.value)} />
                 <button type="button" onClick={onSubmit}>Submit</button>
             </form>
-            <select name="form" onChange={(e) => setAuthForm(e.target.value)}>
+            <select name="form" onChange={(e) => setAuthForm(e.target.value as Form)}>
                 <option value={Form.LOGIN}>{Form.LOGIN}</option>
                 <option value={Form.REGISTER}>{Form.REGISTER}</option>
             </select>
