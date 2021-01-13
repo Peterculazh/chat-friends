@@ -69,7 +69,7 @@ export default class Socket extends ServerContext {
                 });
                 this.io
                     .on('connection', async (socket) => {
-                        const client = this.createClient(socket);
+                        const client = await this.createClient(socket);
                         socket.id;
                         this.addClientToChannel("main", client, socket);
 
@@ -89,11 +89,10 @@ export default class Socket extends ServerContext {
                             if (data.id && data.id !== socket.decodedToken.id) {
                                 const result = await this.di.FriendService.sendRequestToFriend(data.id, socket.decodedToken.id);
                                 if (result && result.length) {
-                                    const [incomingRequests] = result;
+                                    const [incomingRequests, outComingRequest] = result;
                                     const sendFriendRequest = this.clients[incomingRequests.user.id];
                                     this.io.to(sendFriendRequest.socket.id).emit("friendInvite", incomingRequests.incomingRequests);
-                                    // console.log("socket id",sendFriendRequest.socket.id);
-                                    // console.log(outComingRequest);
+                                    this.io.to(socket.id).emit("friendRequest", outComingRequest.outcomingRequests);
                                 }
                             }
                         });
@@ -146,7 +145,9 @@ export default class Socket extends ServerContext {
         });
     }
 
-    public createClient(socket: any): IClient {
+    public async createClient(socket: any): Promise<IClient> {
+        const result = await this.di.RepositoryService.UserRepository.findOne({ id: socket.decodedToken.id }, { relations: ["friendList"] });
+        console.log("createClient", result);
         const client = {
             id: socket.decodedToken.id,
             name: socket.decodedToken.name,

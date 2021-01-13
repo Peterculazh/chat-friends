@@ -9,7 +9,7 @@ export default class RenderController extends ServerContext {
 
     @GET()
     @route('/')
-    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/login")])
+    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/auth")])
     async indexPage(_: Request, res: Response) {
         try {
             console.log('render / ');
@@ -22,7 +22,7 @@ export default class RenderController extends ServerContext {
 
     @GET()
     @route('/chat/:chatId')
-    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/login")])
+    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/auth")])
     async chats(_: Request, res: Response) {
         try {
             console.log('render /chat/:chatId');

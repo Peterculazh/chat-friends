@@ -39,12 +39,10 @@ export default class FriendService extends ServerContext {
     }
 
     public async getOrCreateFriendListEntity(user: User) {
-        let friendList = await this.di.RepositoryService.FriendListRepository.findOne({
-            relations: ['user'],
-            where: {
-                "user": user
-            }
-        });
+        let friendList = await this.di.RepositoryService.FriendListRepository.createQueryBuilder('friendList')
+            .leftJoinAndSelect("friendList.user", "user")
+            .where('user.id = :id', { id: user.id })
+            .getOne();
         if (!friendList) {
             friendList = await this.createFriendListEntity(user);
         }

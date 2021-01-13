@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { FriendList } from "./FriendList";
 @Entity()
 export class User extends BaseEntity {
@@ -10,6 +10,10 @@ export class User extends BaseEntity {
 
     @Column()
     password!: string;
+
+    @OneToOne(() => FriendList, friendList => friendList.user, { cascade: true })
+    @JoinColumn()
+    friendList!: FriendList;
 
     @ManyToMany(() => FriendList, friendList => friendList.incomingRequests)
     incomingRequests!: FriendList[];

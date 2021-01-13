@@ -2,7 +2,7 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 
-enum Form{
+enum Form {
     LOGIN = "login",
     REGISTER = "register"
 }
@@ -20,9 +20,11 @@ export default function Login() {
             password: password
         });
 
-        if(result.data?.data?.success){
+        if (authForm === Form.LOGIN && result.data?.data?.success) {
             router.push('/');
             console.log(result);
+        } else if (authForm === Form.REGISTER && result.data?.data?.success) {
+            setAuthForm(Form.LOGIN);
         }
     }
 

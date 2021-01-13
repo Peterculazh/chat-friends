@@ -1,4 +1,4 @@
-import { BaseEntity, Entity, JoinColumn, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Entity, JoinTable, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "./User";
 
 
@@ -7,8 +7,7 @@ export class FriendList extends BaseEntity {
     @PrimaryGeneratedColumn()
     id!: number;
 
-    @OneToOne(() => User)
-    @JoinColumn()
+    @OneToOne(() => User, user => user.friendList)
     user!: User;
 
     @ManyToMany(() => User, user => user.outcomingRequests, { cascade: true, eager: true })
