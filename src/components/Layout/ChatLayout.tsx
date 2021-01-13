@@ -1,7 +1,6 @@
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
-import { IPublicClientData } from "src/interfaces/socket";
 import Chat from "../Chat";
 
 
@@ -17,12 +16,26 @@ export interface IChannel {
     users: IPublicClientData[],
 }
 
+export interface IFriendData {
+    id: number,
+    name: string,
+}
+
+export interface IPublicClientData {
+    name: string,
+    id: number,
+    isYou: boolean,
+    friends: IFriendData[],
+    incomingRequests: IFriendData[],
+}
+
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
 
     const [socket, setSocket] = useState<Socket | null>(null);
     const [connected, setConnected] = useState(false);
     const [chats, setChats] = useState<Array<IChannel>>([]);
     const [currentChat, setCurrentChat] = useState<null | string>(null);
+    const [userData, setUserData] = useState<IPublicClientData | null>();
 
     useEffect(() => {
         if (!socket && !connected) {
@@ -31,6 +44,7 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             }));
         }
     }, []);
+
     useEffect(() => {
         if (socket) {
             socket.on('connect', (_: any) => {
@@ -43,8 +57,21 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             socket.on("friendInvite", (data: any) => {
                 console.log("friend invite", data);
             });
+            socket.on("userData", (data: any) => {
+                setUserData(data);
+                console.log(data);
+            });
         }
     }, [socket]);
+
+    const handleFriendAccept = (user: IFriendData) => {
+        socket?.emit("acceptRequest", {
+            sourceUser: user,
+            targetUser: {
+                id: userData?.id,
+            }
+        });
+    }
 
     return (
         <>
@@ -65,9 +92,25 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                                 <Chat channel={chats.find(chat => chat.channelId === currentChat)} socket={socket} />
                             </div> :
                             <div>
-                                Empty
-                        </div>
+                                No selected chat
+                            </div>
                         }
+                    </div>
+                    <div>
+                        Incoming requests
+                        {userData?.incomingRequests.map(request =>
+                        <div key={request.id} onClick={() => handleFriendAccept(request)}>
+                            {request.name}
+                        </div>
+                    )}
+                    </div>
+                    <div>
+                        Friends
+                        {userData?.friends.map(friend =>
+                        <div key={friend.id}>
+                            {friend.name}
+                        </div>
+                    )}
                     </div>
                 </div>
                 : <div>

@@ -3,6 +3,12 @@ import { Server } from 'socket.io';
 import socketIO from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
+import { User } from "../entity/User";
+
+interface IFriendData {
+    id: number,
+    name: string,
+}
 
 interface IClient {
     id: number,
@@ -10,7 +16,9 @@ interface IClient {
     socket: any,
     rooms: {
         [key: string]: IChannel
-    }
+    },
+    friends: IFriendData[],
+    incomingRequests: IFriendData[],
 }
 
 interface IChannel {
@@ -32,7 +40,9 @@ interface IMessage {
 interface IPublicClientData {
     name: string,
     id: number,
-    isYou: boolean
+    isYou: boolean,
+    friends?: IFriendData[],
+    incomingRequests?: IFriendData[],
 }
 
 
@@ -70,7 +80,16 @@ export default class Socket extends ServerContext {
                 this.io
                     .on('connection', async (socket) => {
                         const client = await this.createClient(socket);
-                        socket.id;
+                        if (!client) {
+                            console.log("Failed to create connection because user don't exists");
+                            return false;
+                        }
+                        this.io.to(socket.id).emit("userData", {
+                            id: client.id,
+                            name: client.name,
+                            friends: client.friends,
+                            incomingRequests: client.incomingRequests,
+                        });
                         this.addClientToChannel("main", client, socket);
 
                         socket.emit("joinRoom", {
@@ -97,6 +116,10 @@ export default class Socket extends ServerContext {
                             }
                         });
 
+                        socket.on("acceptRequest", async (data: { sourceUser: { id: number }, targetUser: { id: number } }) => {
+                            await this.di.FriendService.acceptFriend(data.targetUser.id, data.sourceUser.id);
+                        });
+
                     });
             } catch (err) {
                 console.log("Socket error - ", err);
@@ -110,11 +133,17 @@ export default class Socket extends ServerContext {
 
     public getClientsDataInChannel(channel: IChannel, socketClient: IClient) {
         const clients: IPublicClientData[] = Object.values(channel.clients).map(client => {
-            return {
+            const clientObject: IPublicClientData = {
                 name: client.name,
                 id: client.id,
-                isYou: client.id === socketClient.id ? true : false, // TODO: Change name
+                isYou: false
+            };
+            if (client.id === socketClient.id) {
+                clientObject["isYou"] = true;
+                clientObject["friends"] = socketClient.friends;
+                clientObject["incomingRequests"] = socketClient.incomingRequests;
             }
+            return clientObject;
         });
         return clients;
     }
@@ -145,18 +174,35 @@ export default class Socket extends ServerContext {
         });
     }
 
-    public async createClient(socket: any): Promise<IClient> {
+    public async createClient(socket: any): Promise<IClient | false> {
         const result = await this.di.RepositoryService.UserRepository.findOne({ id: socket.decodedToken.id }, { relations: ["friendList"] });
-        console.log("createClient", result);
-        const client = {
+        if (!result) {
+            return false;
+        }
+        console.log("result", result);
+        const client: IClient = {
             id: socket.decodedToken.id,
             name: socket.decodedToken.name,
             socket: socket,
-            rooms: {}
+            rooms: {},
+            friends: this.getPublicDataUsersFromFriendList(result.friendList?.friends),
+            incomingRequests: this.getPublicDataUsersFromFriendList(result.friendList?.incomingRequests),
         };
 
         this.clients[client.id] = { ...client };
 
         return this.clients[client.id];
+    }
+
+    public getPublicDataUsersFromFriendList(users: User[]): IFriendData[] | [] {
+        if (!users || !users.length) {
+            return [];
+        }
+        return users.map(user => {
+            return {
+                id: user.id,
+                name: user.name
+            }
+        });
     }
 }

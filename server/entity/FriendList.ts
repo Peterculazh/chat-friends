@@ -10,6 +10,10 @@ export class FriendList extends BaseEntity {
     @OneToOne(() => User, user => user.friendList)
     user!: User;
 
+    @ManyToMany(() => User, { eager: true })
+    @JoinTable()
+    friends!: User[];
+
     @ManyToMany(() => User, user => user.outcomingRequests, { cascade: true, eager: true })
     @JoinTable()
     outcomingRequests!: User[];

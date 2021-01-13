@@ -14,6 +14,14 @@ export default function Chat({ channel, socket }: { channel: IChannel | undefine
                 </>
                 : "test"
         }
+            {
+                channel ?
+                    channel.messages.map(message => <div>
+                        {message}
+                    </div>)
+                    :
+                    "no channel"
+            }
         </>
     )
 }
