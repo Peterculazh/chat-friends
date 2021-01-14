@@ -1,5 +1,6 @@
 import { Socket } from "socket.io-client";
 import { IPublicClientData } from "src/interfaces/socket";
+import '../../styles/components/chat-user-list.sass';
 
 
 
@@ -16,7 +17,7 @@ export default function ChatUserList({ users, socket }: {
 
     return users.length ? <div className="chat-user-list">
         {users.map(user => <div key={user.id}
-            onClick={(e) => addFriend(user)}
+            onClick={() => addFriend(user)}
             className="item">
             {user.name}
         </div>)}

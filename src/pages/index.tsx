@@ -145,16 +145,13 @@ export default function ChatLayout() {
                             )}
                         </div>
                     </div>
-                    <div>
-                        {currentChat && userData ?
-                            <div>
-                                <Chat userData={userData} channel={chats.find(chat => chat.channelId === currentChat)} socket={socket} />
-                            </div> :
-                            <div>
-                                No selected chat
+                    {currentChat && userData ?
+                        <Chat userData={userData} channel={chats.find(chat => chat.channelId === currentChat)} socket={socket} />
+                        :
+                        <div className="chat-not-selected">
+                            No selected chat
                             </div>
-                        }
-                    </div>
+                    }
                 </div>
                 : <div>
                     No connection

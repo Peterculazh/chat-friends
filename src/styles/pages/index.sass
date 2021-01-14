@@ -1,14 +1,19 @@
 .chat-page-wrapper
     max-width: 1024px
     margin: 0 auto
-    padding: 0px 7px
     display: flex
     height: 100vh
+    border-right: 1px solid grey
+    border-left: 1px solid grey
 
 .chat-page-sidebar
     display: flex
     flex-direction: column
     border-right: 1px solid grey
+
+@media (min-width: 1024px)
+    .chat-page-sidebar
+        min-width: 285px
 
 .chat-page-sidebar-item
     display: flex
@@ -20,6 +25,7 @@
         font-size: 16px
         background: #3066b8
         color: white
+
     .item
         padding: 6px 4px
         transition: all 0.25s ease-in-out
@@ -32,3 +38,10 @@
     .item
         display: flex
         justify-content: space-between
+
+.chat-not-selected
+    width: 100%
+    display: flex
+    justify-content: center
+    align-items: center
+    font-size: 18px
