@@ -1,4 +1,4 @@
-import { IChannel, IPublicClientData } from "../Layout/ChatLayout";
+import { IChannel, IPublicClientData } from "../../pages/index";
 import { Socket } from "socket.io-client";
 import UserList from "./Users";
 import { FormEvent, useState } from "react";
@@ -25,7 +25,7 @@ export default function Chat({ channel, socket, userData }: { channel: IChannel 
                 <>
                     <UserList users={channel.users} socket={socket} />
                 </>
-                : "test"
+                : "No users"
         }
             {
                 channel ?

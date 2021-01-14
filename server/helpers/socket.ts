@@ -19,6 +19,7 @@ interface IClient {
     },
     friends: IFriendData[],
     incomingRequests: IFriendData[],
+    outcomingRequests: IFriendData[],
 }
 
 interface IChannel {
@@ -43,6 +44,7 @@ interface IPublicClientData {
     isYou: boolean,
     friends?: IFriendData[],
     incomingRequests?: IFriendData[],
+    outcomingRequests?: IFriendData[],
 }
 
 
@@ -81,6 +83,7 @@ export default class Socket extends ServerContext {
                             name: client.name,
                             friends: client.friends,
                             incomingRequests: client.incomingRequests,
+                            outcomingRequests: client.outcomingRequests,
                         });
                         this.addClientToChannel("main", client, socket);
 
@@ -145,6 +148,7 @@ export default class Socket extends ServerContext {
                 clientObject["isYou"] = true;
                 clientObject["friends"] = socketClient.friends;
                 clientObject["incomingRequests"] = socketClient.incomingRequests;
+                clientObject["outcomingRequests"] = socketClient.outcomingRequests;
             }
             return clientObject;
         });
@@ -190,6 +194,7 @@ export default class Socket extends ServerContext {
             rooms: {},
             friends: this.getPublicDataUsersFromFriendList(result.friendList?.friends),
             incomingRequests: this.getPublicDataUsersFromFriendList(result.friendList?.incomingRequests),
+            outcomingRequests: this.getPublicDataUsersFromFriendList(result.friendList?.outcomingRequests),
         };
 
         this.clients[client.id] = { ...client };
