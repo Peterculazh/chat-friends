@@ -1,0 +1,44 @@
+.auth
+    display: flex
+    justify-content: center
+    align-items: center
+    flex-direction: column
+    height: 100vh
+
+    &-title
+        display: flex
+        flex-direction: column
+        align-items: center
+        font-size: 24px
+
+    .form
+        margin-top: 15px
+        text-align: center
+
+        &-type
+            font-size: 18px
+
+        label
+            margin-right: 7px
+
+            input
+                padding: 3px
+                font-size: 16px
+
+            &:last-child
+                margin-right: 0
+
+        button
+            border: none
+            font-size: 18px
+            padding: 6px
+            cursor: pointer
+            background: #000
+            color: white
+            transition: all 0.25s ease-in-out
+
+            &:hover
+                background: #3a3a3a
+
+            &:active
+                background: #525050
