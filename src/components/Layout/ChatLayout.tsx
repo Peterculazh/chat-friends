@@ -6,17 +6,27 @@ import Chat from "../Chat";
 
 export interface IMessage {
     message: string,
-    author: string,
+    name: string,
     createdAt: number,
 }
 export interface IChannel {
     channelName: string,
     channelId: string,
     messages: IMessage[],
-    users: [{
-        name: string,
-        id: number
-    }],
+    users: IPublicClientData[],
+}
+
+export interface IFriendData {
+    id: number,
+    name: string,
+}
+
+export interface IPublicClientData {
+    name: string,
+    id: number,
+    isYou: boolean,
+    friends: IFriendData[],
+    incomingRequests: IFriendData[],
 }
 
 export default function ChatLayout({ children }: { children: React.ReactNode }) {
@@ -25,12 +35,16 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
     const [connected, setConnected] = useState(false);
     const [chats, setChats] = useState<Array<IChannel>>([]);
     const [currentChat, setCurrentChat] = useState<null | string>(null);
+    const [userData, setUserData] = useState<IPublicClientData>();
 
     useEffect(() => {
-        setSocket(io({
-            query: `jwt=${Cookies.get('jwt')}`
-        }));
+        if (!socket && !connected) {
+            setSocket(io({
+                query: `jwt=${Cookies.get('jwt')}`
+            }));
+        }
     }, []);
+
     useEffect(() => {
         if (socket) {
             socket.on('connect', (_: any) => {
@@ -40,12 +54,53 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
             socket.on("joinRoom", (data: IChannel) => {
                 setChats(currentChats => [...currentChats, data]);
             });
+            socket.on("friendInvite", (data: any) => {
+                console.log("friend invite", data);
+            });
+            socket.on("userData", (data: any) => {
+                setUserData(data);
+                console.log(data);
+            });
+            socket.on("message", ({ message, channelId }: {
+                message: IMessage,
+                channelId: string,
+            }) => {
+                if (message && channelId) {
+                    console.log("message");
+                    setChats(chats => {
+                        const newChats = [...chats];
+                        const chat = newChats.find(chat => chat.channelId === channelId);
+                        if (chat) {
+                            chat.messages.push(message);
+                        }
+                        return newChats;
+                    });
+                }
+            });
         }
     }, [socket]);
 
+    const handleFriendAccept = (user: IFriendData) => {
+        socket?.emit("acceptRequest", {
+            sourceUser: user,
+            targetUser: {
+                id: userData?.id,
+            }
+        });
+    }
+
+    const handleFriendDecline = (user: IFriendData) => {
+        socket?.emit("declineRequest", {
+            sourceUser: user,
+            targetUser: {
+                id: userData?.id,
+            }
+        });
+    }
+
     return (
         <>
-            {connected ?
+            {socket && connected ?
                 <div>
                     <div className="chats">
                         {chats.map(chat =>
@@ -57,14 +112,41 @@ export default function ChatLayout({ children }: { children: React.ReactNode }) 
                         )}
                     </div>
                     <div>
-                        {currentChat ?
+                        {currentChat && userData ?
                             <div>
-                                <Chat channel={chats.find(chat => chat.channelId === currentChat)} />
+                                <Chat userData={userData} channel={chats.find(chat => chat.channelId === currentChat)} socket={socket} />
                             </div> :
                             <div>
-                                Empty
-                        </div>
+                                No selected chat
+                            </div>
                         }
+                    </div>
+                    <div>
+                        Incoming requests
+                        {userData?.incomingRequests.map(request =>
+                        <div key={request.id} onClick={() => handleFriendAccept(request)}>
+                            {request.name} ---
+                            <div onClick={() => handleFriendDecline(request)}>
+                                decline
+                            </div>
+                        </div>
+                    )}
+                    </div>
+                    <div>
+                        Outcoming requests (waiting for response)
+                        {userData?.incomingRequests.map(request =>
+                        <div key={request.id}>
+                            {request.name}
+                        </div>
+                    )}
+                    </div>
+                    <div>
+                        Friends
+                        {userData?.friends.map(friend =>
+                        <div key={friend.id}>
+                            {friend.name}
+                        </div>
+                    )}
                     </div>
                 </div>
                 : <div>

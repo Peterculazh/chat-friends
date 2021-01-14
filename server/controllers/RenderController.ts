@@ -9,7 +9,7 @@ export default class RenderController extends ServerContext {
 
     @GET()
     @route('/')
-    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/login")])
+    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/auth")])
     async indexPage(_: Request, res: Response) {
         try {
             console.log('render / ');
@@ -22,7 +22,7 @@ export default class RenderController extends ServerContext {
 
     @GET()
     @route('/chat/:chatId')
-    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/login")])
+    @before([(req: Request, res: Response, next: NextFunction) => isAuthUser(req, res, next, "/auth")])
     async chats(_: Request, res: Response) {
         try {
             console.log('render /chat/:chatId');
@@ -34,13 +34,13 @@ export default class RenderController extends ServerContext {
     }
 
     @GET()
-    @route('/login')
-    async loginPage(_: Request, res: Response) {
+    @route('/auth')
+    async authPage(_: Request, res: Response) {
         try {
-            console.log("render /login")
-            return res.print('/login', {});
+            console.log("render /auth")
+            return res.print('/auth', {});
         } catch (error) {
-            console.log('error on render route - /login', error);
+            console.log('error on render route - /auth', error);
             return res.print('/', { error });
         }
     }

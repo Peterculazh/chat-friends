@@ -1,5 +1,5 @@
-import { BaseEntity, Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
-import { FriendRequests } from "./FriendRequests";
+import { BaseEntity, Column, Entity, JoinColumn, ManyToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { FriendList } from "./FriendList";
 @Entity()
 export class User extends BaseEntity {
     @PrimaryGeneratedColumn()
@@ -11,13 +11,14 @@ export class User extends BaseEntity {
     @Column()
     password!: string;
 
-    @Column("int", { array: true, nullable: true })
-    array!: number[];
+    @OneToOne(() => FriendList, friendList => friendList.user, { cascade: true })
+    @JoinColumn()
+    friendList!: FriendList;
 
-    @Column({ nullable: true })
-    token!: string;
+    @ManyToMany(() => FriendList, friendList => friendList.incomingRequests)
+    incomingRequests!: FriendList[];
 
-    @ManyToMany(() => FriendRequests, friendRequests => friendRequests.requests)
-    requests!: FriendRequests[];
+    @ManyToMany(() => FriendList, friendList => friendList.outcomingRequests)
+    outcomingRequests!: FriendList[];
 
 }

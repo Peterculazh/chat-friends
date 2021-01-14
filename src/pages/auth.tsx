@@ -2,41 +2,45 @@ import { useState } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 
+enum Form {
+    LOGIN = "login",
+    REGISTER = "register"
+}
+
 export default function Login() {
 
     const [nickName, setNickName] = useState("");
     const [password, setPassword] = useState("");
+    const [authForm, setAuthForm] = useState(Form.LOGIN);
     const router = useRouter();
 
     const onSubmit = async (_: any) => {
-        console.log(nickName, password);
-        const result = await axios.post('/user/login', {
+        const result = await axios.post(`/user/${authForm}`, {
             nickname: nickName,
             password: password
         });
 
-        if(result.data?.data?.success){
+        if (authForm === Form.LOGIN && result.data?.data?.success) {
             router.push('/');
             console.log(result);
+        } else if (authForm === Form.REGISTER && result.data?.data?.success) {
+            setAuthForm(Form.LOGIN);
         }
     }
 
     return (
         <>
             Welcome
-            {/* <form>
-                registration
-                <input type="text" name="nickname" value={nickName} onChange={e => setNickName(e.target.value)} />
-                <input type="password" name="password" value={password} onChange={e => setPassword(e.target.value)} />
-                <button type="button" onClick={onSubmit}>Submit</button>
-            </form> */}
-
             <form>
-                login
+                {authForm}
                 <input type="text" name="nickname" value={nickName} onChange={e => setNickName(e.target.value)} />
                 <input type="password" name="password" value={password} onChange={e => setPassword(e.target.value)} />
                 <button type="button" onClick={onSubmit}>Submit</button>
             </form>
+            <select name="form" onChange={(e) => setAuthForm(e.target.value as Form)}>
+                <option value={Form.LOGIN}>{Form.LOGIN}</option>
+                <option value={Form.REGISTER}>{Form.REGISTER}</option>
+            </select>
         </>
     )
 }
