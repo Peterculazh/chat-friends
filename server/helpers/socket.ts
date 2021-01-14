@@ -54,12 +54,12 @@ export default class Socket extends ServerContext {
     public channels!: Array<IChannel>;
 
     public async init() {
-        this.clients = {};
-        this.channels = [];
-        this.createChannel("main", "Main Room");
-        const mainChannel = this.getChannelByName("main");
-        if (mainChannel) {
-            try {
+        try {
+            this.clients = {};
+            this.channels = [];
+            this.createChannel("main", "Main Room");
+            const mainChannel = this.getChannelByName("main");
+            if (mainChannel) {
                 this.io = new socketIO.Server(this.di.server.listener);
                 this.io.use((socket: any, next) => {
                     const query: any = socket.handshake.query;
@@ -85,6 +85,7 @@ export default class Socket extends ServerContext {
                             incomingRequests: client.incomingRequests,
                             outcomingRequests: client.outcomingRequests,
                         });
+
                         this.addClientToChannel("main", client, socket);
 
                         socket.emit("joinRoom", {
@@ -100,19 +101,42 @@ export default class Socket extends ServerContext {
                                 const result = await this.di.FriendService.sendRequestToFriend(data.id, socket.decodedToken.id);
                                 if (result && result.length) {
                                     const [incomingRequests, outComingRequest] = result;
+                                    const incomingUser = {
+                                        id: incomingRequests.user.id,
+                                        name: incomingRequests.user.name
+                                    };
+                                    const outcomingUser = {
+                                        name: outComingRequest.user.name,
+                                        id: outComingRequest.user.id,
+                                    };
                                     const sendFriendRequest = this.clients[incomingRequests.user.id];
-                                    this.io.to(sendFriendRequest.socket.id).emit("friendInvite", incomingRequests.incomingRequests);
-                                    this.io.to(socket.id).emit("friendRequest", outComingRequest.outcomingRequests);
+
+                                    this.io.to(sendFriendRequest.socket.id).emit("friendInvite", outcomingUser);
+                                    this.io.to(socket.id).emit("friendRequest", incomingUser);
+
+                                    this.clients[incomingRequests.user.id].incomingRequests.push(outcomingUser);
+                                    this.clients[outComingRequest.user.id].outcomingRequests.push(incomingUser);
+
                                 }
                             }
                         });
 
-                        socket.on("acceptRequest", async (data: { sourceUser: { id: number }, targetUser: { id: number } }) => {
+                        socket.on("acceptRequest", async (data: { sourceUser: { id: number }, targetUser: { id: number } }) => { // There targetUser is user from which have come socket event
                             await this.di.FriendService.acceptFriend(data.targetUser.id, data.sourceUser.id);
+
+                            const [sourceUserData, targetUserData] = this.getPublicDataUsersByIds(data.sourceUser.id, data.targetUser.id);
+
+                            this.io.to(socket.id).emit("addFriend", sourceUserData);
+                            this.io.to(this.clients[data.targetUser.id].socket).emit("addFriend", targetUserData);
                         });
 
-                        socket.on("declineRequest", async (data: { sourceUser: { id: number }, targetUser: { id: number } }) => {
+                        socket.on("declineRequest", async (data: { sourceUser: { id: number }, targetUser: { id: number } }) => { // There targetUser is user from which have come socket event
                             await this.di.FriendService.declineFriend(data.targetUser.id, data.sourceUser.id);
+
+                            const [sourceUserData, targetUserData] = this.getPublicDataUsersByIds(data.sourceUser.id, data.targetUser.id);
+
+                            this.io.to(socket.id).emit("declineRequest", sourceUserData);
+                            this.io.to(this.clients[data.targetUser.id].socket).emit("declineRequest", targetUserData);
                         });
 
                         socket.on("message", async (data: { id: number, name: string, channelId: string, message: string }) => {
@@ -127,12 +151,12 @@ export default class Socket extends ServerContext {
                         });
 
                     });
-            } catch (err) {
-                console.log("Socket error - ", err);
+            } else {
+                console.log("Trouble with creating main channel");
             }
-        } else {
-            console.log("Trouble with creating main channel");
-            // console.log("Trying to run sockets again", this.init());
+        }
+        catch (err) {
+            console.log("Socket error - ", err);
         }
 
     }
@@ -186,7 +210,6 @@ export default class Socket extends ServerContext {
         if (!result) {
             return false;
         }
-        console.log("result", result);
         const client: IClient = {
             id: socket.decodedToken.id,
             name: socket.decodedToken.name,
@@ -226,5 +249,17 @@ export default class Socket extends ServerContext {
             message,
             createdAt: Date.now()
         }
+    }
+
+    public getPublicDataUsersByIds(...ids: number[]): IFriendData[] | [] {
+        if (!ids || !ids.length) {
+            return [];
+        }
+        return ids.map(id => {
+            return {
+                id: this.clients[id].id,
+                name: this.clients[id].name,
+            }
+        });
     }
 }

@@ -57,7 +57,30 @@ export default function ChatLayout() {
                 setChats(currentChats => [...currentChats, data]);
             });
             socket.on("friendInvite", (data: any) => {
-                console.log("friend invite", data);
+                setUserData(state => {
+                    if (!state) {
+                        return state;
+                    }
+                    const newState = { ...state };
+                    newState.incomingRequests.push(data);
+                    return newState;
+                })
+            });
+            socket.on("friendRequest", (data: any) => {
+                setUserData(state => {
+                    if (!state) {
+                        return state;
+                    }
+                    const newState = { ...state };
+                    newState.outcomingRequests.push(data);
+                    return newState;
+                })
+            });
+            socket.on("addFriend", (data: any) => {
+                console.log('addFriend', data);
+            });
+            socket.on("declineRequest", (data: any) => {
+                console.log('declineRequest', data);
             });
             socket.on("userData", (data: any) => {
                 setUserData(data);
@@ -68,7 +91,6 @@ export default function ChatLayout() {
                 channelId: string,
             }) => {
                 if (message && channelId) {
-                    console.log("message");
                     setChats(chats => {
                         const newChats = [...chats];
                         const chat = newChats.find(chat => chat.channelId === channelId);

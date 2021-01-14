@@ -1,4 +1,4 @@
-# Learning about Socket.IO
+# Chat with friend-system
 
 Used in this project:
 1. TypeScript
@@ -9,7 +9,7 @@ Used in this project:
 6. Socket.IO
 7. SASS (7-1 pattern)
 
-Install it and run:
+Install it and set database in `ormconfig.json`, and create DB on your server:
 
 ```bash
 npm install
@@ -19,4 +19,5 @@ yarn
 yarn dev
 ```
 
-To test chat on single machine you might use incognito and usual tab in same time or different browsers.
+Once you see the welcome page, you might register and then login. Friend system works, but not every functionality reflected on front-end. Currently implemented only main chat without private chats.
+For second user you can open incognito tab and login there too.
