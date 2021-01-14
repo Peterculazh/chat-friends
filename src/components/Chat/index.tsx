@@ -1,7 +1,8 @@
-import { IChannel, IPublicClientData } from "../Layout/ChatLayout";
+import { IChannel, IPublicClientData } from "../../pages/index";
 import { Socket } from "socket.io-client";
 import UserList from "./Users";
 import { FormEvent, useState } from "react";
+import '../../styles/components/chat.sass';
 
 
 
@@ -20,33 +21,43 @@ export default function Chat({ channel, socket, userData }: { channel: IChannel 
     }
 
     return (
-        <>{
+        <div className="chat-wrapper">{
             channel ?
                 <>
                     <UserList users={channel.users} socket={socket} />
                 </>
-                : "test"
+                : <div>
+                    No connection with channel
+                </div>
         }
             {
                 channel ?
-                    <div>
-                        {channel.messages.map((message, index) => <div key={index}>
-                            <div>
-                                {message.name}
-                            </div>
-                            {message.message}
-                        </div>)}
+                    <div className="chat">
+                        <div className="chat-message-list">
+                            {channel.messages.map((message, index) => <div key={index} className="item">
+                                <div className="item-info">
+                                    <div className="item-author">
+                                        {message.name}
+                                    </div>
+                                    <div className="item-time">
+                                        {new Date(message.createdAt).toLocaleTimeString()}
+                                    </div>
+                                </div>
+                                <div className="item-message">
+                                    {message.message}
+                                </div>
+                            </div>)}
 
-                        <div>
-                            <form onSubmit={handleSubmit}>
-                                <input type="text" value={text} onChange={(e) => setText(e.target.value)} />
-                                <button type="submit">Submit</button>
-                            </form>
                         </div>
+                        <form onSubmit={handleSubmit} className="chat-form">
+                            <input type="text" value={text} onChange={(e) => setText(e.target.value)} />
+                            <button type="submit">Submit</button>
+                        </form>
                     </div>
-                    :
-                    "no channel"
+                    : <div>
+                        No connection with channel
+                </div>
             }
-        </>
+        </div>
     )
 }

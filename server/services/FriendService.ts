@@ -34,6 +34,7 @@ export default class FriendService extends ServerContext {
         if (!friendList) {
             friendList = await this.getOrCreateFriendListEntity(targetUser);
         }
+        console.log(targetUser, sourceUser, friendList);
         friendList.outcomingRequests = [sourceUser];
         return await this.di.RepositoryService.FriendListRepository.save(friendList);
     }

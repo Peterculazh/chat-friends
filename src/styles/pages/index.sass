@@ -1,0 +1,47 @@
+.chat-page-wrapper
+    max-width: 1024px
+    margin: 0 auto
+    display: flex
+    height: 100vh
+    border-right: 1px solid grey
+    border-left: 1px solid grey
+
+.chat-page-sidebar
+    display: flex
+    flex-direction: column
+    border-right: 1px solid grey
+
+@media (min-width: 1024px)
+    .chat-page-sidebar
+        min-width: 285px
+
+.chat-page-sidebar-item
+    display: flex
+    flex-direction: column
+
+    span
+        width: 100%
+        padding: 3px 4px
+        font-size: 16px
+        background: #3066b8
+        color: white
+
+    .item
+        padding: 6px 4px
+        transition: all 0.25s ease-in-out
+
+        &.selected
+            background: #248dad
+            color: white
+
+.chat-page-incoming-requests
+    .item
+        display: flex
+        justify-content: space-between
+
+.chat-not-selected
+    width: 100%
+    display: flex
+    justify-content: center
+    align-items: center
+    font-size: 18px

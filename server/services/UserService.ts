@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { User } from "../entity/User";
 
 
-export default class GameService extends ServerContext {
+export default class UserService extends ServerContext {
 
 
     public async createUser(data: any) {
